@@ -1,0 +1,562 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"Environment": {
+			"type": "string",
+			"defaultValue": "PNC",
+			"metadata": {
+				"description": "Environment."
+			}
+		},
+		"virtualNetworkName": {
+			"type": "string",
+			"defaultValue": "SampleVnet",
+			"metadata": {
+				"description": "vnet Name for the Virtual Machine."
+			}
+		},
+		"WebsubnetName": {
+			"type": "string",
+			"defaultValue": "SampleWebSubnet",
+			"metadata": {
+				"description": "subnet Name for the Virtual Machine."
+			}
+		},
+		"AppsubnetName": {
+			"type": "string",
+			"defaultValue": "SampleAppSubnet",
+			"metadata": {
+				"description": "subnet Name for the Virtual Machine."
+			}
+		},
+		"DBsubnetName": {
+			"type": "string",
+			"defaultValue": "SampleDBSubnet",
+			"metadata": {
+				"description": "subnet Name for the Virtual Machine."
+			}
+		},
+		"WebNSGName": {
+			"type": "string",
+			"defaultValue": "WebNSG",
+			"metadata": {
+				"description": "NSG Name for the Web Virtual Machine."
+			}
+		},
+		"AppNSGName": {
+			"type": "string",
+			"defaultValue": "AppNSG",
+			"metadata": {
+				"description": "NSG Name for the App Virtual Machine."
+			}
+		},
+		"DBNSGName": {
+			"type": "string",
+			"defaultValue": "DBNSG",
+			"metadata": {
+				"description": "NSG Name for the DB Virtual Machine."
+			}
+		}
+	},
+	"variables": {
+		"storageAccountName": "[concat('stdiag', toLower(parameters('Environment')))]",
+		"location": "[resourceGroup().location]"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Storage/storageAccounts",
+			"apiVersion": "2018-11-01",
+			"name": "[variables('storageAccountName')]",
+			"location": "[variables('location')]",
+			"sku": {
+				"name": "Standard_LRS"
+			},
+			"kind": "Storage",
+			"properties": {}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-05-01",
+			"name": "WebServerNestedTemplate",
+			"dependsOn": [
+				"[variables('storageAccountName')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"expressionEvaluationOptions": {
+					"scope": "inner"
+				},
+				"parameters": {
+					"adminUsername": {
+						"value": "pncpnc123"
+					},
+					"adminPassword": {
+						"value": "pncpnc@12345"
+					},
+					"Environment Name": {
+						"value": "[parameters('Environment')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
+					"subnetName": {
+						"value": "[parameters('WebsubnetName')]"
+					},
+					"NSGName": {
+						"value": "[parameters('WebNSGName')]"
+					}
+				},
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"parameters": {
+						"adminUsername": {
+							"type": "string",
+							"defaultValue": "pncpnc123",
+							"metadata": {
+								"description": "Username for the Virtual Machine."
+							}
+						},
+						"adminPassword": {
+							"type": "securestring",
+							"defaultValue": "pncpnc@12345",
+							"metadata": {
+								"description": "Password for the Virtual Machine."
+							}
+						},
+						"Environment Name": {
+							"type": "string",
+							"defaultValue": "",
+							"metadata": {
+								"description": "Environment Name for the Virtual Machine."
+							}
+						},
+						"virtualNetworkName": {
+							"type": "string",
+							"defaultValue": "vnet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "vnet Name for the Virtual Machine."
+							}
+						},
+						"subnetName": {
+							"type": "string",
+							"defaultValue": "snet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "subnet Name for the Virtual Machine."
+							}
+						},
+						"NSGName": {
+							"type": "string",
+							"defaultValue": "TestNSG",
+							"metadata": {
+								"description": "NSG Name for the Virtual Machine."
+							}
+						}
+					},
+					"variables": {
+						"virtualNetworkResourceGroup": "[resourceGroup().name]",
+						"vmName": "[concat('vm-web-',parameters('Environment Name'))]",
+						"vmSize": "Standard_F2",
+						"windowsOSVersion": "2016-Datacenter",
+						"nicName": "[concat('nic-web-',parameters('Environment Name'))]",
+						"location": "[resourceGroup().location]",
+						"subnetRef": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+						"nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('NSGName'))]"
+
+					},
+					"resources": [
+						{
+							"type": "Microsoft.Network/networkInterfaces",
+							"apiVersion": "2019-07-01",
+							"name": "[variables('nicName')]",
+							"location": "[variables('location')]",
+							"dependsOn": [],
+							"properties": {
+								"ipConfigurations": [
+									{
+										"name": "ipconfig1",
+										"properties": {
+											"privateIpAddressVersion": "IPv4",
+											"privateIPAllocationMethod": "Dynamic",
+											"subnet": {
+												"id": "[variables('subnetRef')]"
+											}
+										}
+									}
+								],
+								"networkSecurityGroup": {
+									"id": "[variables('nsgId')]"
+								}
+							}
+						},
+						{
+							"type": "Microsoft.Compute/virtualMachines",
+							"apiVersion": "2018-10-01",
+							"name": "[variables('vmName')]",
+							"location": "[variables('location')]",
+							"dependsOn": [
+								"[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+							],
+							"properties": {
+								"hardwareProfile": {
+									"vmSize": "[variables('vmSize')]"
+								},
+								"osProfile": {
+									"computerName": "[variables('vmName')]",
+									"adminUsername": "[parameters('adminUsername')]",
+									"adminPassword": "[parameters('adminPassword')]"
+								},
+								"storageProfile": {
+									"imageReference": {
+										"publisher": "MicrosoftWindowsServer",
+										"offer": "WindowsServer",
+										"sku": "[variables('windowsOSVersion')]",
+										"version": "latest"
+									},
+									"osDisk": {
+										"createOption": "FromImage"
+									},
+									"dataDisks": [
+										{
+											"diskSizeGB": 100,
+											"lun": 0,
+											"createOption": "Empty"
+										}
+									]
+								},
+								"networkProfile": {
+									"networkInterfaces": [
+										{
+											"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-05-01",
+			"name": "AppServerTemplate",
+			"dependsOn": [
+				"[variables('storageAccountName')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"expressionEvaluationOptions": {
+					"scope": "inner"
+				},
+				"parameters": {
+					"adminUsername": {
+						"value": "pncpnc123"
+					},
+					"adminPassword": {
+						"value": "pncpnc@12345"
+					},
+					"Environment Name": {
+						"value": "[parameters('Environment')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
+					"subnetName": {
+						"value": "[parameters('AppsubnetName')]"
+					},
+					"NSGName": {
+						"value": "[parameters('AppNSGName')]"
+					}
+				},
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"parameters": {
+						"adminUsername": {
+							"type": "string",
+							"defaultValue": "pncpnc123",
+							"metadata": {
+								"description": "Username for the Virtual Machine."
+							}
+						},
+						"adminPassword": {
+							"type": "securestring",
+							"defaultValue": "pncpnc@12345",
+							"metadata": {
+								"description": "Password for the Virtual Machine."
+							}
+						},
+						"Environment Name": {
+							"type": "string",
+							"defaultValue": "RNDteam1",
+							"metadata": {
+								"description": "Environment Name for the Virtual Machine."
+							}
+						},
+						"virtualNetworkName": {
+							"type": "string",
+							"defaultValue": "vnet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "vnet Name for the Virtual Machine."
+							}
+						},
+						"subnetName": {
+							"type": "string",
+							"defaultValue": "snet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "subnet Name for the Virtual Machine."
+							}
+						},
+						"NSGName": {
+							"type": "string",
+							"defaultValue": "TestNSG",
+							"metadata": {
+								"description": "NSG Name for the Virtual Machine."
+							}
+						}
+					},
+					"variables": {
+						"virtualNetworkResourceGroup": "[resourceGroup().name]",
+						"vmName": "[concat('vm-app-',parameters('Environment Name'))]",
+						"vmSize": "Standard_F2",
+						"windowsOSVersion": "2016-Datacenter",
+						"nicName": "[concat('nic-app-',parameters('Environment Name'))]",
+						"location": "[resourceGroup().location]",
+						"subnetRef": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+						"nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('NSGName'))]"
+					},
+					"resources": [
+						{
+							"type": "Microsoft.Network/networkInterfaces",
+							"apiVersion": "2018-11-01",
+							"name": "[variables('nicName')]",
+							"location": "[variables('location')]",
+							"properties": {
+								"ipConfigurations": [
+									{
+										"name": "ipconfig1",
+										"properties": {
+											"privateIPAllocationMethod": "Dynamic",
+											"subnet": {
+												"id": "[variables('subnetRef')]"
+											}
+										}
+									}
+								],
+								"networkSecurityGroup": {
+									"id": "[variables('nsgId')]"
+								}
+							}
+						},
+						{
+							"type": "Microsoft.Compute/virtualMachines",
+							"apiVersion": "2018-10-01",
+							"name": "[variables('vmName')]",
+							"location": "[variables('location')]",
+							"dependsOn": [
+								"[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+							],
+							"properties": {
+								"hardwareProfile": {
+									"vmSize": "[variables('vmSize')]"
+								},
+								"osProfile": {
+									"computerName": "[variables('vmName')]",
+									"adminUsername": "[parameters('adminUsername')]",
+									"adminPassword": "[parameters('adminPassword')]"
+								},
+								"storageProfile": {
+									"imageReference": {
+										"publisher": "MicrosoftWindowsServer",
+										"offer": "WindowsServer",
+										"sku": "[variables('windowsOSVersion')]",
+										"version": "latest"
+									},
+									"osDisk": {
+										"createOption": "FromImage"
+									},
+									"dataDisks": [
+										{
+											"diskSizeGB": 100,
+											"lun": 0,
+											"createOption": "Empty"
+										}
+									]
+								},
+								"networkProfile": {
+									"networkInterfaces": [
+										{
+											"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-05-01",
+			"name": "DBServerTemplate",
+			"dependsOn": [
+				"[variables('storageAccountName')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"expressionEvaluationOptions": {
+					"scope": "inner"
+				},
+				"parameters": {
+					"adminUsername": {
+						"value": "pncpnc123"
+					},
+					"adminPassword": {
+						"value": "pncpnc@12345"
+					},
+					"Environment Name": {
+						"value": "[parameters('Environment')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
+					"subnetName": {
+						"value": "[parameters('DBsubnetName')]"
+					},
+					"NSGName": {
+						"value": "[parameters('DBNSGName')]"
+					}
+				},
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"parameters": {
+						"adminUsername": {
+							"type": "string",
+							"defaultValue": "pncpnc123",
+							"metadata": {
+								"description": "Username for the Virtual Machine."
+							}
+						},
+						"adminPassword": {
+							"type": "securestring",
+							"defaultValue": "pncpnc@12345",
+							"metadata": {
+								"description": "Password for the Virtual Machine."
+							}
+						},
+						"Environment Name": {
+							"type": "string",
+							"defaultValue": "RNDteam1",
+							"metadata": {
+								"description": "Environment Name for the Virtual Machine."
+							}
+						},
+						"virtualNetworkName": {
+							"type": "string",
+							"defaultValue": "vnet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "vnet Name for the Virtual Machine."
+							}
+						},
+						"subnetName": {
+							"type": "string",
+							"defaultValue": "snet-midlandls-enterprise-0011",
+							"metadata": {
+								"description": "subnet Name for the Virtual Machine."
+							}
+						},
+						"NSGName": {
+							"type": "string",
+							"defaultValue": "TestNSG",
+							"metadata": {
+								"description": "NSG Name for the Virtual Machine."
+							}
+						}
+					},
+					"variables": {
+						"virtualNetworkResourceGroup": "[resourceGroup().name]",
+						"vmName": "[concat('vm-db-',parameters('Environment Name'))]",
+						"vmSize": "Standard_F2",
+						"windowsOSVersion": "SQLDEV",
+						"nicName": "[concat('nic-db-',parameters('Environment Name'))]",
+						"location": "[resourceGroup().location]",
+						"subnetRef": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+						"nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('NSGName'))]"
+					},
+					"resources": [
+						{
+							"type": "Microsoft.Network/networkInterfaces",
+							"apiVersion": "2018-11-01",
+							"name": "[variables('nicName')]",
+							"location": "[variables('location')]",
+							"properties": {
+								"ipConfigurations": [
+									{
+										"name": "ipconfig1",
+										"properties": {
+											"privateIPAllocationMethod": "Dynamic",
+											"subnet": {
+												"id": "[variables('subnetRef')]"
+											}
+										}
+									}
+								],
+								"networkSecurityGroup": {
+									"id": "[variables('nsgId')]"
+								}
+							}
+						},
+						{
+							"type": "Microsoft.Compute/virtualMachines",
+							"apiVersion": "2018-10-01",
+							"name": "[variables('vmName')]",
+							"location": "[variables('location')]",
+							"dependsOn": [
+								"[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+							],
+							"properties": {
+								"hardwareProfile": {
+									"vmSize": "[variables('vmSize')]"
+								},
+								"osProfile": {
+									"computerName": "[variables('vmName')]",
+									"adminUsername": "[parameters('adminUsername')]",
+									"adminPassword": "[parameters('adminPassword')]"
+								},
+								"storageProfile": {
+									"imageReference": {
+										"publisher": "MicrosoftSQLServer",
+										"offer": "SQL2017-WS2016",
+										"sku": "[variables('windowsOSVersion')]",
+										"version": "latest"
+									},
+									"osDisk": {
+										"createOption": "FromImage"
+									},
+									"dataDisks": [
+										{
+											"diskSizeGB": 100,
+											"lun": 0,
+											"createOption": "Empty"
+										}
+									]
+								},
+								"networkProfile": {
+									"networkInterfaces": [
+										{
+											"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		}
+	]
+}

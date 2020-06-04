@@ -1,0 +1,104 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Environment": {
+      "type": "string",
+      "defaultValue": "RND",
+      "metadata": {
+        "description": "Environment."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "TestVnet",
+      "metadata": {
+        "description": "vnet Name for the Virtual Machine."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "TestSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountName": "[concat('stdiag', toLower(parameters('Environment')))]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "linkedTemplate1",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/webserver_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": { "value": "pncpnc" },
+          "adminPassword": { "value": "pncpnc@12345" },
+          "Environment Name": { "value": "[parameters('Environment')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
+          "subnetName": { "value": "[parameters('subnetName')]" }
+        }
+
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "linkedTemplate2",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/appserver_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": { "value": "pncpnc" },
+          "adminPassword": { "value": "pncpnc@12345" },
+          "Environment Name": { "value": "[parameters('Environment')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
+          "subnetName": { "value": "[parameters('subnetName')]" }
+        }
+
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "linkedTemplate3",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/dbserver_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": { "value": "pncpnc" },
+          "adminPassword": { "value": "pncpnc@12345" },
+          "Environment Name": { "value": "[parameters('Environment')]" },
+          "virtualNetworkName": { "value": "[parameters('virtualNetworkName')]" },
+          "subnetName": { "value": "[parameters('subnetName')]" }
+        }
+
+      }
+    }
+  ]
+}

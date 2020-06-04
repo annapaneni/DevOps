@@ -1,0 +1,193 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Environment": {
+      "type": "string",
+      "defaultValue": "RND",
+      "metadata": {
+        "description": "Environment."
+      }
+    },
+    "virtualNetworkID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/virtualNetworks/DemoVnet",
+      "metadata": {
+        "description": "vnet ID for the Virtual Machine."
+      }
+    },
+    "WebsubnetName": {
+      "type": "string",
+      "defaultValue": "WebSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "AppsubnetName": {
+      "type": "string",
+      "defaultValue": "AppSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "DBsubnetName": {
+      "type": "string",
+      "defaultValue": "DBSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "WebNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/WebNSG",
+      "metadata": {
+        "description": "NSG ID for the Web Virtual Machine."
+      }
+    },
+    "AppNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/AppNSG",
+      "metadata": {
+        "description": "NSG ID for the App Virtual Machine."
+      }
+    },
+    "DBNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/DBNSG",
+      "metadata": {
+        "description": "NSG ID for the DB Virtual Machine."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountName": "[concat('stdiag', toLower(parameters('Environment')))]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "WebServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/Stack1-Web.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkID": {
+            "value": "[parameters('virtualNetworkID')]"
+          },
+          "subnetName": {
+            "value": "[parameters('WebsubnetName')]"
+          },
+          "NSGID": {
+            "value": "[parameters('WebNSGID')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "AppServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/Stack1-App.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkID": {
+            "value": "[parameters('virtualNetworkID')]"
+          },
+          "subnetName": {
+            "value": "[parameters('AppsubnetName')]"
+          },
+          "NSGID": {
+            "value": "[parameters('AppNSGID')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "DBServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/Stack1-DB.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkID": {
+            "value": "[parameters('virtualNetworkID')]"
+          },
+          "subnetName": {
+            "value": "[parameters('DBsubnetName')]"
+          },
+          "NSGID": {
+            "value": "[parameters('DBNSGID')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          }
+        }
+      }
+    }
+  ]
+}

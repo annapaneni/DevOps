@@ -1,0 +1,335 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "pncpnc123",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "pncpnc@12345",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "Environment Name": {
+      "type": "string",
+      "defaultValue": "RND",
+      "metadata": {
+        "description": "Environment Name for the Virtual Machine."
+      }
+    },
+    "virtualNetworkID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/virtualNetworks/DemoVnet",
+      "metadata": {
+        "description": "vnet ID for the Virtual Machine."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "DBSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "NSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/DBNSG",
+      "metadata": {
+        "description": "NSG ID for the Virtual Machine."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "stdiagrnd",
+      "metadata": {
+        "description": "storageAccountName for the Virtual Machine."
+      }
+    }
+  },
+  "variables": {
+    "vmName": "[concat('vm-db-',parameters('Environment Name'))]",
+    "vmSize": "Standard_D2s_v3",
+    "nicName": "[concat('nic-db-',parameters('Environment Name'))]",
+    "location": "[resourceGroup().location]",
+    "vnetId": "[parameters('virtualNetworkID')]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+    "nsgId": "[parameters('NSGID')]",
+    "domainToJoin": "ilab.midlandls.com",
+    "domainJoinOptions": 3,
+    "OUPath": "OU=Demo,DC=ilab,DC=midlandls,DC=com",
+    "osDiskType": "Premium_LRS",
+    "dataDisks": [
+      {
+        "lun": 0,
+        "createOption": "attach",
+        "caching": "ReadOnly",
+        "writeAcceleratorEnabled": false,
+        "id": null,
+        "name": "[concat(variables('vmName'),'_DataDisk')]",
+        "storageAccountType": null,
+        "diskSizeGB": null,
+        "diskEncryptionSet": null
+      },
+      {
+        "lun": 1,
+        "createOption": "attach",
+        "caching": "None",
+        "writeAcceleratorEnabled": false,
+        "id": null,
+        "name": "[concat(variables('vmName'),'_LogDisk')]",
+        "storageAccountType": null,
+        "diskSizeGB": null,
+        "diskEncryptionSet": null
+      },
+      {
+        "lun": 2,
+        "createOption": "attach",
+        "caching": "ReadOnly",
+        "writeAcceleratorEnabled": false,
+        "id": null,
+        "name": "[concat(variables('vmName'),'_TempDBDisk')]",
+        "storageAccountType": null,
+        "diskSizeGB": null,
+        "diskEncryptionSet": null
+      }
+    ],
+    "dataDiskResources": [
+      {
+        "name": "[concat(variables('vmName'),'_DataDisk')]",
+        "sku": "Premium_LRS",
+        "properties": {
+          "diskSizeGB": 1024,
+          "creationData": {
+            "createOption": "empty"
+          }
+        }
+      },
+      {
+        "name": "[concat(variables('vmName'),'_LogDisk')]",
+        "sku": "Premium_LRS",
+        "properties": {
+          "diskSizeGB": 1024,
+          "creationData": {
+            "createOption": "empty"
+          }
+        }
+      },
+      {
+        "name": "[concat(variables('vmName'),'_TempDBDisk')]",
+        "sku": "Premium_LRS",
+        "properties": {
+          "diskSizeGB": 1024,
+          "creationData": {
+            "createOption": "empty"
+          }
+        }
+      }
+    ],
+    "sqlVirtualMachineName": "[variables('vmName')]",
+    "sqlVirtualMachineLocation": "[variables('location')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2019-07-01",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIpAddressVersion": "IPv4",
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgId')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('dataDiskResources')[copyIndex()].name]",
+      "type": "Microsoft.Compute/disks",
+      "apiVersion": "2019-07-01",
+      "location": "[variables('location')]",
+      "properties": "[variables('dataDiskResources')[copyIndex()].properties]",
+      "sku": {
+        "name": "[variables('dataDiskResources')[copyIndex()].sku]"
+      },
+      "copy": {
+        "name": "managedDiskResources",
+        "count": "[length(variables('dataDiskResources'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "managedDiskResources",
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            }
+          },
+          "imageReference": {
+            "publisher": "MicrosoftSQLServer",
+            "offer": "SQL2016SP2-WS2016",
+            "sku": "Enterprise",
+            "version": "latest"
+          },
+          "copy": [
+            {
+              "name": "dataDisks",
+              "count": "[length(variables('dataDisks'))]",
+              "input": {
+                "lun": "[variables('dataDisks')[copyIndex('dataDisks')].lun]",
+                "createOption": "[variables('dataDisks')[copyIndex('dataDisks')].createOption]",
+                "caching": "[variables('dataDisks')[copyIndex('dataDisks')].caching]",
+                "writeAcceleratorEnabled": "[variables('dataDisks')[copyIndex('dataDisks')].writeAcceleratorEnabled]",
+                "diskSizeGB": "[variables('dataDisks')[copyIndex('dataDisks')].diskSizeGB]",
+                "managedDisk": {
+                  "id": "[coalesce(variables('dataDisks')[copyIndex('dataDisks')].id, if(equals(variables('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', variables('dataDisks')[copyIndex('dataDisks')].name)))]",
+                  "storageAccountType": "[variables('dataDisks')[copyIndex('dataDisks')].storageAccountType]"
+                }
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat('shutdown-computevm-', variables('vmName'))]",
+      "type": "Microsoft.DevTestLab/schedules",
+      "apiVersion": "2017-04-26-preview",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
+      "properties": {
+        "status": "Enabled",
+        "taskType": "ComputeVmShutdownTask",
+        "dailyRecurrence": {
+          "time": "17:00"
+        },
+        "timeZoneId": "Eastern Standard Time",
+        "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]",
+        "notificationSettings": {
+          "status": "Disabled",
+          "notificationLocale": "en",
+          "timeInMinutes": "30"
+        }
+      }
+    },
+    {
+      "name": "[variables('sqlVirtualMachineName')]",
+      "type": "Microsoft.SqlVirtualMachine/SqlVirtualMachines",
+      "apiVersion": "2017-03-01-preview",
+      "location": "[variables('sqlVirtualMachineLocation')]",
+      "properties": {
+        "virtualMachineResourceId": "[resourceId('Microsoft.Compute/virtualMachines', variables('sqlVirtualMachineName'))]",
+        "sqlManagement": "Full",
+        "SqlServerLicenseType": "PAYG",
+        "StorageConfigurationSettings": {
+          "DiskConfigurationType": "NEW",
+          "StorageWorkloadType": "OLTP",
+          "SQLDataSettings": {
+            "LUNs": [
+              0
+            ],
+            "DefaultFilePath": "F:\\data"
+          },
+          "SQLLogSettings": {
+            "LUNs": [
+              1
+            ],
+            "DefaultFilePath": "G:\\log"
+          },
+          "SQLTempDbSettings": {
+            "LUNs": [
+              2
+            ],
+            "DefaultFilePath": "H:\\tempDb"
+          }
+        },
+        "ServerConfigurationsManagementSettings": {
+          "SQLConnectivityUpdateSettings": {
+            "ConnectivityType": "Private",
+            "Port": "1433",
+            "SQLAuthUpdateUserName": "[parameters('adminUsername')]",
+            "SQLAuthUpdatePassword": "[parameters('adminPassword')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('sqlVirtualMachineName'))]"
+      ]
+    },
+    {
+      "comments": "Join domain - JsonADDomainExtension",
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+        "[concat('Microsoft.SqlVirtualMachine/SqlVirtualMachines/', variables('sqlVirtualMachineName'))]"
+      ],
+      "name": "[concat(variables('vmName'),'/joindomain')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "JsonADDomainExtension",
+        "typeHandlerVersion": "1.3",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "Name": "[variables('domainToJoin')]",
+          "OUPath": "[variables('OUPath')]",
+          "User": "[concat('ilab-midlandls\\', parameters('adminUsername'))]",
+          "Restart": "true",
+          "Options": "[variables('domainJoinOptions')]"
+        },
+        "protectedSettings": {
+          "Password": "[parameters('adminPassword')]"
+        }
+      }
+    }
+  ]
+}

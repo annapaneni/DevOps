@@ -1,0 +1,263 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "existingVNETName": {
+      "type": "string",
+      "defaultValue": "TestVnet",
+      "metadata": {
+        "description": "Name of the VNET to add a subnet to"
+      }
+    },
+    "WebSubnetName": {
+      "type": "string",
+      "defaultValue": "WebSubnet",
+      "metadata": {
+        "description": "Name of the Web subnet to add"
+      }
+    },
+    "WebSubnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.7.0.0/24",
+      "metadata": {
+        "description": "Address space of the Web subnet to add"
+      }
+    },
+    "WebnetworkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "WebNSG",
+      "metadata": {
+        "description": "NSG of the web subnet to add"
+      }
+    },
+    "AppSubnetName": {
+      "type": "string",
+      "defaultValue": "AppSubnet",
+      "metadata": {
+        "description": "Name of the App subnet to add"
+      }
+    },
+    "AppSubnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.7.1.0/24",
+      "metadata": {
+        "description": "Address space of the App subnet to add"
+      }
+    },
+    "AppnetworkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "AppNSG",
+      "metadata": {
+        "description": "NSG of the App subnet to add"
+      }
+    },
+    "DBSubnetName": {
+      "type": "string",
+      "defaultValue": "DBSubnet",
+      "metadata": {
+        "description": "Name of the DB subnet to add"
+      }
+    },
+    "DBSubnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.7.2.0/24",
+      "metadata": {
+        "description": "Address space of the DB subnet to add"
+      }
+    },
+    "DBnetworkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "DBNSG",
+      "metadata": {
+        "description": "NSG of the DB subnet to add"
+      }
+    }
+  },
+  "resources": [
+    {
+      "comments": "Default Network Security Group for template",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('WebnetworkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-1433",
+            "properties": {
+              "priority": 100,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "1433",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "[parameters('DBSubnetAddressPrefix')]"
+            }
+          },
+          {
+            "name": "default-allow-3389",
+            "properties": {
+              "priority": 200,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "default-allow-ICMP",
+            "properties": {
+              "priority": 300,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-04-01",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "dependsOn": [
+        "[parameters('WebnetworkSecurityGroupName')]"
+      ],
+      "name": "[concat(parameters('existingVNETName'), '/', parameters('WebSubnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[parameters('WebSubnetAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('WebnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "comments": "Default Network Security Group for template",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('AppnetworkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-1433",
+            "properties": {
+              "priority": 100,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "1433",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "[parameters('DBSubnetAddressPrefix')]"
+            }
+          },
+          {
+            "name": "default-allow-3389",
+            "properties": {
+              "priority": 200,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "default-allow-ICMP",
+            "properties": {
+              "priority": 300,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-04-01",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "dependsOn": [
+        "[parameters('AppnetworkSecurityGroupName')]",
+        "[parameters('WebSubnetName')]"
+      ],
+      "name": "[concat(parameters('existingVNETName'), '/', parameters('AppSubnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[parameters('AppSubnetAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('AppnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "comments": "Default Network Security Group for template",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('DBnetworkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-3389",
+            "properties": {
+              "priority": 200,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "default-allow-ICMP",
+            "properties": {
+              "priority": 300,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-04-01",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "dependsOn": [
+        "[parameters('DBnetworkSecurityGroupName')]",
+        "[parameters('AppSubnetName')]"
+      ],
+      "name": "[concat(parameters('existingVNETName'), '/', parameters('DBSubnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[parameters('DBSubnetAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('DBnetworkSecurityGroupName'))]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

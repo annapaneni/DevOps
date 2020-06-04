@@ -1,0 +1,184 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Environment": {
+      "type": "string",
+      "defaultValue": "RND",
+      "metadata": {
+        "description": "Environment."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "TestVnet",
+      "metadata": {
+        "description": "vnet Name for the Virtual Machine."
+      }
+    },
+    "WebsubnetName": {
+      "type": "string",
+      "defaultValue": "WebSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "AppsubnetName": {
+      "type": "string",
+      "defaultValue": "AppSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "DBsubnetName": {
+      "type": "string",
+      "defaultValue": "DBSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "WebNSGName": {
+      "type": "string",
+      "defaultValue": "WebNSG",
+      "metadata": {
+        "description": "NSG Name for the Web Virtual Machine."
+      }
+    },
+    "AppNSGName": {
+      "type": "string",
+      "defaultValue": "AppNSG",
+      "metadata": {
+        "description": "NSG Name for the App Virtual Machine."
+      }
+    },
+    "DBNSGName": {
+      "type": "string",
+      "defaultValue": "DBNSG",
+      "metadata": {
+        "description": "NSG Name for the DB Virtual Machine."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountName": "[concat('stdiag', toLower(parameters('Environment')))]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "WebServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/webserver_NSG_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "subnetName": {
+            "value": "[parameters('WebsubnetName')]"
+          },
+          "NSGName": {
+            "value": "[parameters('WebNSGName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "AppServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/appserver_NSG_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "subnetName": {
+            "value": "[parameters('AppsubnetName')]"
+          },
+          "NSGName": {
+            "value": "[parameters('AppNSGName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "DBServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://storageforjson.blob.core.windows.net/containerforjson/dbserver_NSG_template.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "pncpnc123"
+          },
+          "adminPassword": {
+            "value": "pncpnc@12345"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "subnetName": {
+            "value": "[parameters('DBsubnetName')]"
+          },
+          "NSGName": {
+            "value": "[parameters('DBNSGName')]"
+          }
+        }
+      }
+    }
+  ]
+}

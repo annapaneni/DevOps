@@ -1,0 +1,114 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "pncpnc123",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "pncpnc@12345",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "Environment Name": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Environment Name for the Virtual Machine."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "samplevnet",
+      "metadata": {
+        "description": "vnet Name for the Virtual Machine."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "websamplesubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    }
+
+  },
+  "variables": {
+    "virtualNetworkResourceGroup": "[resourceGroup().name]",
+    "vmName": "[concat('vm-web-',parameters('Environment Name'))]",
+    "vmSize": "Standard_Ds3_v2",
+    "windowsOSVersion": "2016-Datacenter",
+    "nicName": "[concat('nic-web-',parameters('Environment Name'))]",
+    "location": "[resourceGroup().location]",
+    "subnetRef": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+    "customImageId": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/Midlandls-Core_RG/providers/Microsoft.Compute/images/WebServerImage"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "id": "[variables('customImageId')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "diskSizeGB": 100,
+              "lun": 0,
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

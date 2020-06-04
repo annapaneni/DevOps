@@ -1,0 +1,352 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "testapp1",
+      "metadata": {
+        "description": "Environment."
+      }
+    },
+    "virtualNetworkID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/virtualNetworks/DemoVnet",
+      "metadata": {
+        "description": "vnet ID for the Virtual Machine."
+      }
+    },
+    "WebsubnetName": {
+      "type": "string",
+      "defaultValue": "WebSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "AppsubnetName": {
+      "type": "string",
+      "defaultValue": "AppSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "DBsubnetName": {
+      "type": "string",
+      "defaultValue": "DBSubnet",
+      "metadata": {
+        "description": "subnet Name for the Virtual Machine."
+      }
+    },
+    "WebNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/WebNSG",
+      "metadata": {
+        "description": "NSG ID for the Web Virtual Machine."
+      }
+    },
+    "AppNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/AppNSG",
+      "metadata": {
+        "description": "NSG ID for the App Virtual Machine."
+      }
+    },
+    "DBNSGID": {
+      "type": "string",
+      "defaultValue": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-spoke-Demo-net/providers/Microsoft.Network/networkSecurityGroups/DBNSG",
+      "metadata": {
+        "description": "NSG ID for the DB Virtual Machine."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountName": "[concat('stdiag', toLower(parameters('Environment')))]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "AppServerTemplate",
+      "dependsOn": [
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "Environment Name": {
+            "value": "[parameters('Environment')]"
+          },
+          "virtualNetworkID": {
+            "value": "[parameters('virtualNetworkID')]"
+          },
+          "subnetName": {
+            "value": "[parameters('AppsubnetName')]"
+          },
+          "NSGID": {
+            "value": "[parameters('AppNSGID')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "adminUsername": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Username for the Virtual Machine."
+              }
+            },
+            "adminPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Password for the Virtual Machine."
+              }
+            },
+            "Environment Name": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Environment Name for the Virtual Machine."
+              }
+            },
+            "virtualNetworkID": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "vnet ID for the Virtual Machine."
+              }
+            },
+            "subnetName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "subnet Name for the Virtual Machine."
+              }
+            },
+            "NSGID": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "NSG ID for the Virtual Machine."
+              }
+            },
+            "storageAccountName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "storageAccountName for the Virtual Machine."
+              }
+            }
+          },
+          "variables": {
+            "vmName": "[concat('vm-app-',parameters('Environment Name'))]",
+            "WebvmName": "[concat('vm-web-',parameters('Environment Name'))]",
+            "DBvmName": "[concat('vm-db-',parameters('Environment Name'))]",
+            "vmSize": "Standard_D2s_v3",
+            "windowsOSVersion": "2016-Datacenter",
+            "nicName": "[concat('nic-app-',parameters('Environment Name'))]",
+            "location": "[resourceGroup().location]",
+            "RGName": "[resourceGroup().name]",
+            "vnetId": "[parameters('virtualNetworkID')]",
+            "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+            "nsgId": "[parameters('NSGID')]",
+            "domainToJoin": "ilab.midlandls.com",
+            "OUPath": "OU=AppServers,DC=ilab,DC=midlandls,DC=com",
+            "domainJoinOptions": 3,
+            "customImageId": "/subscriptions/ec2027c3-4206-4cef-be4e-833cc78517f0/resourceGroups/rg-hub/providers/Microsoft.Compute/images/ServerImage"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2019-07-01",
+              "name": "[variables('nicName')]",
+              "location": "[variables('location')]",
+              "dependsOn": [],
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIpAddressVersion": "IPv4",
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      }
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[variables('nsgId')]"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2018-10-01",
+              "name": "[variables('vmName')]",
+              "location": "[variables('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+              ],
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                  "computerName": "[variables('vmName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                 "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                  "osDisk": {
+                    "createOption": "FromImage"
+                  },
+                  "dataDisks": [
+                    {
+                      "diskSizeGB": 100,
+                      "lun": 0,
+                      "createOption": "Empty"
+                    }
+                  ]
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/')]"
+                  }
+                }
+              }
+            },
+            {
+              "name": "[concat('shutdown-computevm-', variables('vmName'))]",
+              "type": "Microsoft.DevTestLab/schedules",
+              "apiVersion": "2017-04-26-preview",
+              "location": "[variables('location')]",
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+              ],
+              "properties": {
+                "status": "Enabled",
+                "taskType": "ComputeVmShutdownTask",
+                "dailyRecurrence": {
+                  "time": "17:00"
+                },
+                "timeZoneId": "Eastern Standard Time",
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]",
+                "notificationSettings": {
+                  "status": "Disabled",
+                  "notificationLocale": "en",
+                  "timeInMinutes": "30"
+                }
+              }
+            },
+            {
+              "comments": "Join domain - JsonADDomainExtension",
+              "apiVersion": "2015-06-15",
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+              ],
+              "name": "[concat(variables('vmName'),'/joindomain')]",
+              "location": "[variables('location')]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "Name": "[variables('domainToJoin')]",
+                  "OUPath": "[variables('OUPath')]",
+                  "User": "[concat('ilab-midlandls\\', parameters('adminUsername'))]",
+                  "Restart": "false",
+                  "Options": "[variables('domainJoinOptions')]"
+                },
+                "protectedSettings": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            },
+            {
+              "apiVersion": "2018-06-01",
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "name": "[concat(variables('vmName'),'/config-App')]",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+              ],
+              "tags": {
+                "displayName": "config-app"
+              },
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "https://storageforjson.blob.core.windows.net/appserver/ARMconfigureApp.ps1"
+                  ],
+                  "timestamp": 123456789
+                },
+                "protectedSettings": {
+                  "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ARMconfigureApp.ps1', ' ilab-midlandls ', 'xsElmService ',  variables('DBvmName'), '  ', variables('WebvmName'), '  ', variables('vmName'), ' ', variables('location'), ' ', parameters('adminPassword'), ' ', variables('RGName') )]",
+                  "storageAccountName": "storageforjson",
+                  "storageAccountKey": "uCcQ6ZZQrByXZJBnt0WLKLuLczy7z2g2owRgPpW2nc4GMAYPP2Jwcyv5jj//3Ttff761B+Z2fDP59vHAetjwmA=="
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

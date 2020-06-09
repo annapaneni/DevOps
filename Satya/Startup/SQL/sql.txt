@@ -1,0 +1,3 @@
+create login ilab-midlandls\pl39260 from windows
+Go
+sp_addrolemember @rolename='db_datawriter', @membername='ilab-midlandls\pl39260

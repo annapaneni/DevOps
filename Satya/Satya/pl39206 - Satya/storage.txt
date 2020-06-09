@@ -1,0 +1,18 @@
+Get-AzStorageAccount | select StorageAccountName
+$StorageAccount = Get-AzStorageAccount | where  { $_.StorageAccountName -eq 'midlandlsapplication' }
+$StorageAccount | Get-AzStorageContainer | Get-AzStorageBlob
+
+# Container Uri: https://midlandlsapplication.blob.core.windows.net/applicationstorage
+
+$Container = $StorageAccount | Get-AzStorageContainer
+
+
+$Container | Set-AzStorageBlobContent -File 'C:\iLab Scripts\iLab_Resources.ps1' -Blob 'iLab_Resources Script'
+
+
+Get-ChildItem -Path 'C:\iLab Scripts' | foreach {
+
+ $Container | Set-AzStorageBlobContent -File $_.FullName -Blob $_.BaseName 
+}
+
+"https://midlandlsapplication.blob.core.windows.net/applicationstorage?DefaultEndpointsProtocol=https;AccountName=midlandlsapplication;AccountKey=H6swO6V+hSnASfOLhf8IYHeHwkgi6n7rTbUmDMy5vML98ukKOwjriWksHY99X2Y00zaT9HK05FO6iFAzYgCZYg==;EndpointSuffix=core.windows.net"

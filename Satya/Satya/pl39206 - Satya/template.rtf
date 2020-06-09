@@ -1,0 +1,208 @@
+{\rtf1\ansi\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.14393}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9\{\par
+    "$schema": "{{\field{\*\fldinst{HYPERLINK https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json# }}{\fldrslt{https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\ul0\cf0}}}}\f0\fs22 ",\par
+    "contentVersion": "1.0.0.0",\par
+  "parameters": \{\par
+    "adminUsername": \{\par
+      "type": "string",\par
+      "metadata": \{\par
+        "description": "Username for the Virtual Machine."\par
+      \}\par
+    \},\par
+    "adminPassword": \{\par
+      "type": "securestring",\par
+      "metadata": \{\par
+        "description": "Password for the Virtual Machine."\par
+      \}\par
+    \},\par
+    "windowsOSVersion": \{\par
+      "type": "string",\par
+      "defaultValue": "2016-Datacenter",\par
+      "allowedValues": [\par
+        "2008-R2-SP1",\par
+        "2012-Datacenter",\par
+        "2012-R2-Datacenter",\par
+        "2016-Nano-Server",\par
+        "2016-Datacenter-with-Containers",\par
+        "2016-Datacenter",\par
+        "2019-Datacenter"\par
+      ],\par
+      "metadata": \{\par
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."\par
+      \}\par
+    \},\par
+    "vmSize": \{\par
+      "type": "string",\par
+      "defaultValue": "Standard_D2_v3",\par
+      "metadata": \{\par
+        "description": "Size of the virtual machine."\par
+      \}\par
+    \},\par
+    "location": \{\par
+      "type": "string",\par
+      "defaultValue": "[resourceGroup().location]",\par
+      "metadata": \{\par
+        "description": "Location for all resources."\par
+      \}\par
+    \},\par
+    "storageAccountName": \{\par
+      "type": "string",\par
+      "defaultValue": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",\par
+      "metadata": \{\par
+        "description": "Location for storage account."\par
+      \}\par
+    \}\par
+  \},\par
+\par
+    "variables": \{\par
+        "nicName": "myVMNic",\par
+        "addressPrefix": "10.0.0.0/16",\par
+        "subnetName": "Subnet",\par
+        "subnetPrefix": "10.0.0.0/24",\par
+        "vmName": "SimpleWinVM",\par
+        "virtualNetworkName": "MyVNET",\par
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",\par
+        "networkSecurityGroupName": "default-NSG"\par
+    \},\par
+    "resources": [\par
+        \{\par
+            "type": "Microsoft.Storage/storageAccounts",\par
+            "apiVersion": "2018-11-01",\par
+            "name": "[variables('storageAccountName')]",\par
+            "location": "[parameters('location')]",\par
+            "sku": \{\par
+                "name": "Standard_LRS"\par
+            \},\par
+            "kind": "Storage",\par
+            "properties": \{\}\par
+        \},\par
+        \{\par
+            "comments": "Default Network Security Group for template",\par
+            "type": "Microsoft.Network/networkSecurityGroups",\par
+            "apiVersion": "2019-08-01",\par
+            "name": "[variables('networkSecurityGroupName')]",\par
+            "location": "[parameters('location')]",\par
+            "properties": \{\par
+                "securityRules": [\par
+                    \{\par
+                        "name": "default-allow-3389",\par
+                        "properties": \{\par
+                            "priority": 1000,\par
+                            "access": "Allow",\par
+                            "direction": "Inbound",\par
+                            "destinationPortRange": "3389",\par
+                            "protocol": "Tcp",\par
+                            "sourcePortRange": "*",\par
+                            "sourceAddressPrefix": "*",\par
+                            "destinationAddressPrefix": "*"\par
+                        \}\par
+                    \}\par
+                ]\par
+            \}\par
+        \},\par
+        \{\par
+            "type": "Microsoft.Network/virtualNetworks",\par
+            "apiVersion": "2018-11-01",\par
+            "name": "[variables('virtualNetworkName')]",\par
+            "location": "[parameters('location')]",\par
+            "dependsOn": [\par
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"\par
+            ],\par
+            "properties": \{\par
+                "addressSpace": \{\par
+                    "addressPrefixes": [\par
+                        "[variables('addressPrefix')]"\par
+                    ]\par
+                \},\par
+                "subnets": [\par
+                    \{\par
+                        "name": "[variables('subnetName')]",\par
+                        "properties": \{\par
+                            "addressPrefix": "[variables('subnetPrefix')]",\par
+                            "networkSecurityGroup": \{\par
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"\par
+                            \}\par
+                        \}\par
+                    \}\par
+                ]\par
+            \}\par
+        \},\par
+        \{\par
+            "type": "Microsoft.Network/networkInterfaces",\par
+            "apiVersion": "2018-11-01",\par
+            "name": "[variables('nicName')]",\par
+            "location": "[parameters('location')]",\par
+            "dependsOn": [\par
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"\par
+            ],\par
+            "properties": \{\par
+                "ipConfigurations": [\par
+                    \{\par
+                        "name": "ipconfig1",\par
+                        "properties": \{\par
+                            "privateIPAllocationMethod": "Dynamic",\par
+                            "subnet": \{\par
+                                "id": "[variables('subnetRef')]"\par
+                            \}\par
+                        \}\par
+                    \}\par
+                ]\par
+            \}\par
+        \},\par
+        \{\par
+            "type": "Microsoft.Compute/virtualMachines",\par
+            "apiVersion": "2018-10-01",\par
+            "name": "[variables('vmName')]",\par
+            "location": "[parameters('location')]",\par
+            "dependsOn": [\par
+                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",\par
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"\par
+            ],\par
+            "properties": \{\par
+                "hardwareProfile": \{\par
+                    "vmSize": "[parameters('vmSize')]"\par
+                \},\par
+                "osProfile": \{\par
+                    "computerName": "[variables('vmName')]",\par
+                    "adminUsername": "[parameters('adminUsername')]",\par
+                    "adminPassword": "[parameters('adminPassword')]"\par
+                \},\par
+                "storageProfile": \{\par
+                    "imageReference": \{\par
+                        "publisher": "MicrosoftWindowsServer",\par
+                        "offer": "WindowsServer",\par
+                        "sku": "[parameters('windowsOSVersion')]",\par
+                        "version": "latest"\par
+                    \},\par
+                    "osDisk": \{\par
+                        "createOption": "FromImage"\par
+                    \},\par
+                    "dataDisks": [\par
+                        \{\par
+                            "diskSizeGB": 1023,\par
+                            "lun": 0,\par
+                            "createOption": "Empty"\par
+                        \}\par
+                    ]\par
+                \},\par
+                "networkProfile": \{\par
+                    "networkInterfaces": [\par
+                        \{\par
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"\par
+                        \}\par
+                    ]\par
+                \},\par
+                "diagnosticsProfile": \{\par
+                    "bootDiagnostics": \{\par
+                        "enabled": true,\par
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))).primaryEndpoints.blob]"\par
+                    \}\par
+                \}\par
+            \}\par
+        \}\par
+    ]\par
+\}\par
+}
+ 

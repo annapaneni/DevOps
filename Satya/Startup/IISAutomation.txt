@@ -1,0 +1,25 @@
+F:\App\Binaries\demolegacyapp
+
+clear
+Get-IISSite
+Import-Module "WebAdministration"
+New-Item iis:\Sites\demolegacyapp -bindings @{protocol="http";bindingInformation=":80:demolegacyapp"} -physicalPath F:\App\Binaries\demolegacyapp\DemoLegacyApp
+
+clear
+Import-Module "WebAdministration"
+
+New-Item IIS:\AppPools\demolegacyapp
+
+New-Item iis:\Sites\demolegacyapp -bindings @{protocol="http";bindingInformation=":81:"} -physicalPath F:\App\Binaries\demolegacyapp\DemoLegacyApp
+
+Set-ItemProperty IIS:\Sites\demolegacyapp -name applicationPool -value demolegacyapp
+
+New-Item IIS:\Sites\demolegacyapp\demolegacyappVirtualDirectory -physicalPath F:\App\Binaries\demolegacyapp\DemoLegacyApp -type VirtualDirectory
+
+New-Item IIS:\Sites\demolegacyapp -physicalPath F:\App\Binaries\demolegacyapp\DemoLegacyApp -type Application
+
+Set-ItemProperty IIS:\sites\demolegacyapp\DemoApp -name applicationPool -value demolegacyapp
+New-Item IIS:\Sites\demolegacyapp\DemoVirtualDir1 -physicalPath F:\App\Binaries\demolegacyapp\DemoLegacyApp -type VirtualDirectory
+
+New-Item IIS:\Sites\demolegacyapp\DemoApp\DemoVirtualDir2 -physicalPath C:\demolegacyapp\DemoVirtualDir2 -type VirtualDirectory
+

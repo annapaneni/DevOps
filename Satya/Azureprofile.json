@@ -1,0 +1,72 @@
+﻿{
+  "DefaultContextKey": "CIB - Midland PoT (ec2027c3-4206-4cef-be4e-833cc78517f0) - satyaprasad.annapaneni@pncilab.com",
+  "EnvironmentTable": {},
+  "Contexts": {
+    "CIB - Midland PoT (ec2027c3-4206-4cef-be4e-833cc78517f0) - satyaprasad.annapaneni@pncilab.com": {
+      "Account": {
+        "Id": "satyaprasad.annapaneni@pncilab.com",
+        "Credential": null,
+        "Type": "User",
+        "TenantMap": {},
+        "ExtendedProperties": {
+          "Tenants": "1da782d1-e930-491b-8135-2fb047851e47"
+        }
+      },
+      "Tenant": {
+        "Id": "1da782d1-e930-491b-8135-2fb047851e47",
+        "Directory": null,
+        "ExtendedProperties": {}
+      },
+      "Subscription": {
+        "Id": "ec2027c3-4206-4cef-be4e-833cc78517f0",
+        "Name": "CIB - Midland PoT",
+        "State": "Enabled",
+        "ExtendedProperties": {
+          "Account": "satyaprasad.annapaneni@pncilab.com",
+          "Tenants": "1da782d1-e930-491b-8135-2fb047851e47",
+          "Environment": "AzureCloud"
+        }
+      },
+      "Environment": {
+        "Name": "AzureCloud",
+        "OnPremise": false,
+        "ServiceManagementUrl": "https://management.core.windows.net/",
+        "ResourceManagerUrl": "https://management.azure.com/",
+        "ManagementPortalUrl": "https://go.microsoft.com/fwlink/?LinkId=254433",
+        "PublishSettingsFileUrl": "https://go.microsoft.com/fwlink/?LinkID=301775",
+        "ActiveDirectoryAuthority": "https://login.microsoftonline.com/",
+        "GalleryUrl": "https://gallery.azure.com/",
+        "GraphUrl": "https://graph.windows.net/",
+        "ActiveDirectoryServiceEndpointResourceId": "https://management.core.windows.net/",
+        "StorageEndpointSuffix": "core.windows.net",
+        "SqlDatabaseDnsSuffix": ".database.windows.net",
+        "TrafficManagerDnsSuffix": "trafficmanager.net",
+        "AzureKeyVaultDnsSuffix": "vault.azure.net",
+        "AzureKeyVaultServiceEndpointResourceId": "https://vault.azure.net",
+        "GraphEndpointResourceId": "https://graph.windows.net/",
+        "DataLakeEndpointResourceId": "https://datalake.azure.net/",
+        "BatchEndpointResourceId": "https://batch.core.windows.net/",
+        "AzureDataLakeAnalyticsCatalogAndJobEndpointSuffix": "azuredatalakeanalytics.net",
+        "AzureDataLakeStoreFileSystemEndpointSuffix": "azuredatalakestore.net",
+        "AdTenant": "Common",
+        "VersionProfiles": [],
+        "ExtendedProperties": {
+          "OperationalInsightsEndpoint": "https://api.loganalytics.io/v1",
+          "OperationalInsightsEndpointResourceId": "https://api.loganalytics.io",
+          "AzureAnalysisServicesEndpointSuffix": "asazure.windows.net",
+          "AnalysisServicesEndpointResourceId": "https://region.asazure.windows.net",
+          "AzureAttestationServiceEndpointSuffix": "attest.azure.net",
+          "AzureAttestationServiceEndpointResourceId": "https://attest.azure.net",
+          "AzureSynapseAnalyticsEndpointSuffix": "dev.azuresynapse.net",
+          "AzureSynapseAnalyticsEndpointResourceId": "https://dev.azuresynapse.net"
+        }
+      },
+      "VersionProfile": null,
+      "TokenCache": {
+        "CacheData": "AwAAAAEAAACRAWh0dHBzOi8vbG9naW4ud2luZG93cy5uZXQvMWRhNzgyZDEtZTkzMC00OTFiLTgxMzUtMmZiMDQ3ODUxZTQ3Lzo6Omh0dHBzOi8vbWFuYWdlbWVudC5jb3JlLndpbmRvd3MubmV0Lzo6OjE5NTBhMjU4LTIyN2ItNGUzMS1hOWNmLTcxNzQ5NTk0NWZjMjo6OjDmHnsiUmVmcmVzaFRva2VuIjoiQVFBQkFBQUFBQUFtLTA2YmxCRTFUcFZNaWw4S1BRNDFNMUVZaG1VWkRrMEJFV3Fmb1ZNVGJ4U2FDMW4xTXRDUm9YalhBZ0NVdXJOeHZqNXJqdElFYlcyQWg4cVBwZGRucUZ2QlB1RDU2ZG0xMVpuQ1BBM2cxblU0NDRIWEtna3FINjRZVVRwdWRfYS1IU0d0T3RCcTNZajd0ZTRjWS1SVkl4SVRfRmtmM3kySDRMZHh4Vk9acFBPY214cjVBZEdCX0libmZWZ2E3TkU1QUNHTTF2Z3VkMnY4d25tampKX01WLUJENlI3QzJTdm05eERqS1FJTjhyMUdIMjBnTE5oekVXWlJqSjh4bE5HUF8wTlpFNDV0NzVHUkFoS0tnU3VSNlZMRW5FelE1SnRnWGg1NHUzZ1ZhNjlIRU1rZ1JrcFFvLXpmbUw0Y0lMUGVYN3ZoTHdLMG1PYU8xakJLOUZibWptM3AxZVR6WVdDQ1dFeVNqMWUtdDJYeXBNT2hkUklyYW05enRoekJwd184SEgzc0NuMWRXSUhjRmh0WTUyYVg5R3V5UFRMUGkyOFc1a0xyZWliUmNhcHRLcmlPemYxRXlCcUViZ2JxZ2ttTVZVNU1KMURCWU5xYVF0TXFzS1FUNFEtTXhNZUNRY1o5SEdhOUt2aUZZbTQzS2JnZVU2eU5fRnFfcXI0T29YcG52b1lscjVVLUVxTnQ5bWQyZkpBZjZlZ0Nob0V5LUhlX1lXQ19meHNFZDNKSTFHUmY1eFJWVVZ4dWZUMUJkTW1CeTRIWWQyUmN1Z21QTkpRYzNNN3FicTR6d1JaeG9VckFURHVyS1FBRVZCNW4tTjIxRnJFRGFnVFZaTzg3a1pwSWhFbTNZZTRWbmJJbC15b05WajRGaDNJOHZsd3BkamltWjlxR1RkSmxNdkV0RXlKNGVsQ3NfTEQ5Ty1SbE04TVY0SE9pUFhEVVJnQm9QR3BHWGtuOTZ5OFFicU1DS0dfT0NWT1h1VjZzNk8yOFpsZlV2aFk3dUFsaVJ0dzlEN0VlV2llWGhEOXYwV2FneUFYYjhmdjB1WExEZjJHUFVELTlGbnFrRy0zU2h5c2h2TEYxbk1UYXFIektGUlQyZmIzVVY0U0pSOXFoUlNkbXRxRGwtQVNlRjFEY0dkRU83bzktMEx2RUJHQVFCcWFMWHFleFF0UWFsOW5FYkcteklSbTBrRnUxSEtqTUNEdXd2NkRwVVZwZUlBQSIsIlJlc291cmNlSW5SZXNwb25zZSI6Imh0dHBzOlwvXC9tYW5hZ2VtZW50LmNvcmUud2luZG93cy5uZXRcLyIsIlJlc3VsdCI6eyJBY2Nlc3NUb2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlJc0luZzFkQ0k2SWxOelduTkNUbWhhWTBZelVUbFROSFJ5Y0ZGQ1ZFSjVUbEpTU1NJc0ltdHBaQ0k2SWxOelduTkNUbWhhWTBZelVUbFROSFJ5Y0ZGQ1ZFSjVUbEpTU1NKOS5leUpoZFdRaU9pSm9kSFJ3Y3pvdkwyMWhibUZuWlcxbGJuUXVZMjl5WlM1M2FXNWtiM2R6TG01bGRDOGlMQ0pwYzNNaU9pSm9kSFJ3Y3pvdkwzTjBjeTUzYVc1a2IzZHpMbTVsZEM4eFpHRTNPREprTVMxbE9UTXdMVFE1TVdJdE9ERXpOUzB5Wm1Jd05EYzROVEZsTkRjdklpd2lhV0YwSWpveE5Ua3hNekF5TkRJMUxDSnVZbVlpT2pFMU9URXpNREkwTWpVc0ltVjRjQ0k2TVRVNU1UTXdOak15TlN3aVlXTnlJam9pTVNJc0ltRnBieUk2SWpReVpHZFpTV2xsZWpOdVpUUktkVzU0YzNVcmVGSk1iQzgzWkhObWRWaFNTRTFXYWxWNlltSTFObUpFTjJKc2RUZE1UVUlpTENKaGJYSWlPbHNpY0hka0lsMHNJbUZ3Y0dsa0lqb2lNVGsxTUdFeU5UZ3RNakkzWWkwMFpUTXhMV0U1WTJZdE56RTNORGsxT1RRMVptTXlJaXdpWVhCd2FXUmhZM0lpT2lJd0lpd2labUZ0YVd4NVgyNWhiV1VpT2lKQmJtNWhjR0Z1Wlc1cElpd2laMmwyWlc1ZmJtRnRaU0k2SWxOaGRIbGhjSEpoYzJGa0lpd2laM0p2ZFhCeklqcGJJbUl3WVRSaU0yUm1MVFF5TjJZdE5ESmhOQzFpWkdRMExUaGpaV0ppWkRkbE1EUTJOeUpkTENKcGNHRmtaSElpT2lJME1DNDROQzR4Tmk0NE5pSXNJbTVoYldVaU9pSlRZWFI1WVhCeVlYTmhaQ0JCYm01aGNHRnVaVzVwSWl3aWIybGtJam9pWlRaaU9XRXdOR010WXpWaE5pMDBOR1ZrTFdJd09ETXRNekF4TURreU5HVXlNalE0SWl3aWNIVnBaQ0k2SWpFd01ETXlNREF3UVRFMVFUa3lRVVFpTENKelkzQWlPaUoxYzJWeVgybHRjR1Z5YzI5dVlYUnBiMjRpTENKemRXSWlPaUpLTTI1TmRISXdkMHRCUVUxemRHSklNSFJaZW1rM05FZzJaREZ2VXpCcU1EVTJURkZ2VUVscVRVaHpJaXdpZEdsa0lqb2lNV1JoTnpneVpERXRaVGt6TUMwME9URmlMVGd4TXpVdE1tWmlNRFEzT0RVeFpUUTNJaXdpZFc1cGNYVmxYMjVoYldVaU9pSnpZWFI1WVhCeVlYTmhaQzVoYm01aGNHRnVaVzVwUUhCdVkybHNZV0l1WTI5dElpd2lkWEJ1SWpvaWMyRjBlV0Z3Y21GellXUXVZVzV1WVhCaGJtVnVhVUJ3Ym1OcGJHRmlMbU52YlNJc0luVjBhU0k2SWxZMGF6TjVZemR1VWtWVGFFUkhOMFJYYWtzNVFVRWlMQ0oyWlhJaU9pSXhMakFpZlEuTzVuZWJFRDczV3lRcTYtU182S3BycjM5MmNyZ2NrTGthYmE0Zk5qczI0T29haVprUmxFUExyOHlESHozU295WWJKY0RKaGdKMVhaX3M4SGIyVmlSdm5WQ1JsTlpkX1UwV0ppME5lYWw5YWVnXzE3NDhtOGhnOU5GQjlwdjNvZkUwY01XOGlfcmw0dE9zTU9DTExsc0NCRTAxbXRTeXRlVmdRR0NwOHNlSjNTQVE5TDlnUEVwRTVDQlhpVGZFMW9MMmpWa0VKWkpDRlZ2M2N3djhBOExDSEk4MGlTQVkzLXl4VlBjdjItd1hxSGRsbEk1WDI2N0s1ekh3dmh0LTk2WkRvYUNUSi1VMllEaDBYZEE3MjBJWEI3SC1RZDMxRW5ldFNidGw3Wk9TSHB3MVVJbnIwZWNpZ0hlSFJXdTl5ZEtMOVhLUzdBcWlIYi1fa2pERXhFdW1RIiwiQWNjZXNzVG9rZW5UeXBlIjoiQmVhcmVyIiwiRXhwaXJlc09uIjp7IkRhdGVUaW1lIjoiXC9EYXRlKDE1OTEzMDYzMjQ4ODIpXC8iLCJPZmZzZXRNaW51dGVzIjowfSwiRXh0ZW5kZWRFeHBpcmVzT24iOnsiRGF0ZVRpbWUiOiJcL0RhdGUoMTU5MTMwNjMyNDg4MilcLyIsIk9mZnNldE1pbnV0ZXMiOjB9LCJFeHRlbmRlZExpZmVUaW1lVG9rZW4iOmZhbHNlLCJJZFRva2VuIjoiZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKdWIyNWxJbjAuZXlKaGRXUWlPaUl4T1RVd1lUSTFPQzB5TWpkaUxUUmxNekV0WVRsalppMDNNVGMwT1RVNU5EVm1ZeklpTENKcGMzTWlPaUpvZEhSd2N6b3ZMM04wY3k1M2FXNWtiM2R6TG01bGRDOHhaR0UzT0RKa01TMWxPVE13TFRRNU1XSXRPREV6TlMweVptSXdORGM0TlRGbE5EY3ZJaXdpYVdGMElqb3hOVGt4TXpBeU5ESTFMQ0p1WW1ZaU9qRTFPVEV6TURJME1qVXNJbVY0Y0NJNk1UVTVNVE13TmpNeU5Td2lZVzF5SWpwYkluQjNaQ0pkTENKbVlXMXBiSGxmYm1GdFpTSTZJa0Z1Ym1Gd1lXNWxibWtpTENKbmFYWmxibDl1WVcxbElqb2lVMkYwZVdGd2NtRnpZV1FpTENKcGNHRmtaSElpT2lJME1DNDROQzR4Tmk0NE5pSXNJbTVoYldVaU9pSlRZWFI1WVhCeVlYTmhaQ0JCYm01aGNHRnVaVzVwSWl3aWIybGtJam9pWlRaaU9XRXdOR010WXpWaE5pMDBOR1ZrTFdJd09ETXRNekF4TURreU5HVXlNalE0SWl3aWMzVmlJam9pVFhaR05HSnJZVWx1TnpoYVdWWkRjVUUzTVZjMlprTTNZV2hpZVZkWGRrOVdZV3hXT0VsV1ZHdFdheUlzSW5ScFpDSTZJakZrWVRjNE1tUXhMV1U1TXpBdE5Ea3hZaTA0TVRNMUxUSm1ZakEwTnpnMU1XVTBOeUlzSW5WdWFYRjFaVjl1WVcxbElqb2ljMkYwZVdGd2NtRnpZV1F1WVc1dVlYQmhibVZ1YVVCd2JtTnBiR0ZpTG1OdmJTSXNJblZ3YmlJNkluTmhkSGxoY0hKaGMyRmtMbUZ1Ym1Gd1lXNWxibWxBY0c1amFXeGhZaTVqYjIwaUxDSjJaWElpT2lJeExqQWlmUS4iLCJUZW5hbnRJZCI6IjFkYTc4MmQxLWU5MzAtNDkxYi04MTM1LTJmYjA0Nzg1MWU0NyIsIlVzZXJJbmZvIjp7IkRpc3BsYXlhYmxlSWQiOiJzYXR5YXByYXNhZC5hbm5hcGFuZW5pQHBuY2lsYWIuY29tIiwiRmFtaWx5TmFtZSI6IkFubmFwYW5lbmkiLCJHaXZlbk5hbWUiOiJTYXR5YXByYXNhZCIsIklkZW50aXR5UHJvdmlkZXIiOiJodHRwczpcL1wvc3RzLndpbmRvd3MubmV0XC8xZGE3ODJkMS1lOTMwLTQ5MWItODEzNS0yZmIwNDc4NTFlNDdcLyIsIlBhc3N3b3JkQ2hhbmdlVXJsIjpudWxsLCJQYXNzd29yZEV4cGlyZXNPbiI6bnVsbCwiVW5pcXVlSWQiOiJlNmI5YTA0Yy1jNWE2LTQ0ZWQtYjA4My0zMDEwOTI0ZTIyNDgifX0sIlVzZXJBc3NlcnRpb25IYXNoIjpudWxsfQ=="
+      },
+      "ExtendedProperties": {}
+    }
+  },
+  "ExtendedProperties": {}
+}
